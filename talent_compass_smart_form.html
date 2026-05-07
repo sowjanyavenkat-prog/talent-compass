@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talent Compass — Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2e;
+    --navy-mid: #162236;
+    --teal: #0e9e8e;
+    --teal-light: #12b5a3;
+    --teal-dim: rgba(14,158,142,0.15);
+    --gold: #c9a227;
+    --gold-light: #e0b93a;
+    --white: #f4f6f9;
+    --muted: #8da0b5;
+    --border: rgba(255,255,255,0.07);
+    --card: rgba(255,255,255,0.04);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14,158,142,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(201,162,39,0.06) 0%, transparent 50%);
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 48px;
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(13,27,46,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-inner { width: 16px; height: 16px; background: var(--navy); clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+  .brand-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; }
+  .brand-sub { font-size: 10px; letter-spacing: 0.18em; color: var(--teal); text-transform: uppercase; margin-top: 2px; }
+  .header-right { margin-left: auto; font-size: 11px; color: var(--muted); text-align: right; letter-spacing: 0.05em; }
+
+  /* Form type badge */
+  .form-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--teal-dim); border: 1px solid rgba(14,158,142,0.3);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--teal-light); margin-bottom: 16px;
+  }
+  .form-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); display: inline-block; }
+
+  .form-wrap { max-width: 900px; margin: 0 auto; padding: 40px 48px 80px; }
+
+  .form-hero { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .form-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+  .form-hero h1 em { font-style: italic; color: var(--teal-light); }
+  .form-hero p { color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 580px; }
+
+  /* Pre-filled participant card */
+  .participant-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .participant-card.manager-card { border-color: rgba(201,162,39,0.2); background: rgba(201,162,39,0.04); }
+  .pc-field label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
+  .pc-field .pc-value { font-size: 14px; font-weight: 500; color: var(--white); }
+  .pc-locked { font-size: 10px; color: var(--teal); letter-spacing: 0.08em; margin-top: 2px; }
+  .pc-editable input {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px; color: var(--white);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; width: 100%;
+    transition: border-color 0.2s;
+  }
+  .pc-editable input:focus { border-color: var(--teal); }
+  .pc-editable input::placeholder { color: var(--muted); }
+
+  /* Scale legend */
+  .scale-legend {
+    display: flex; gap: 16px; margin-bottom: 24px;
+    padding: 12px 18px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px; flex-wrap: wrap;
+  }
+  .scale-legend span { font-size: 11px; color: var(--muted); }
+  .scale-legend strong { color: var(--white); font-weight: 500; }
+
+  /* Progress */
+  .progress-bar-wrap { margin-bottom: 28px; }
+  .progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 11px; color: var(--muted); }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--gold)); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
+
+  /* Dimension blocks */
+  .dimension-block { margin-bottom: 28px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color 0.2s; }
+  .dimension-block:hover { border-color: rgba(14,158,142,0.25); }
+  .dim-header { display: flex; align-items: center; gap: 14px; padding: 18px 22px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+  .dim-number { width: 34px; height: 34px; background: var(--teal-dim); border: 1px solid rgba(14,158,142,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--teal-light); flex-shrink: 0; }
+  .dim-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; }
+  .dim-theory { font-size: 11px; color: var(--teal); letter-spacing: 0.06em; margin-top: 2px; }
+
+  .question-row { padding: 16px 22px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 20px; }
+  .question-row:last-child { border-bottom: none; }
+  .question-id { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 3px; }
+  .question-text { font-size: 13.5px; line-height: 1.55; color: rgba(244,246,249,0.88); }
+
+  .likert { display: flex; gap: 5px; flex-shrink: 0; }
+  .likert input[type="radio"] { display: none; }
+  .likert label { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .likert label:hover { border-color: var(--teal); color: var(--teal-light); background: var(--teal-dim); }
+  .likert input[type="radio"]:checked + label { background: var(--teal); border-color: var(--teal); color: var(--navy); font-weight: 600; }
+
+  /* Open text */
+  .open-text-block { padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .open-text-block:last-child { border-bottom: none; }
+  .open-text-block .q-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .open-text-block .question-text { font-size: 13.5px; color: rgba(244,246,249,0.88); margin-bottom: 10px; line-height: 1.55; }
+  .open-text-block textarea { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 11px 15px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; resize: vertical; min-height: 76px; outline: none; transition: border-color 0.2s; line-height: 1.6; }
+  .open-text-block textarea::placeholder { color: var(--muted); }
+  .open-text-block textarea:focus { border-color: var(--teal); }
+
+  /* Submit */
+  .submit-area { margin-top: 36px; display: flex; align-items: center; justify-content: space-between; padding-top: 24px; border-top: 1px solid var(--border); gap: 24px; }
+  .submit-note { font-size: 12px; color: var(--muted); max-width: 360px; line-height: 1.5; }
+  .submit-btn { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: var(--navy); border: none; border-radius: 10px; padding: 15px 36px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s; display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(14,158,142,0.35); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .submit-btn svg { width: 15px; height: 15px; }
+
+  /* Error state */
+  .error-msg { color: #ff6b6b; font-size: 12px; margin-top: 8px; display: none; }
+
+  /* Success */
+  .success-screen { display: none; text-align: center; padding: 80px 48px; }
+  .success-screen.show { display: block; }
+  .success-icon { width: 68px; height: 68px; background: var(--teal-dim); border: 2px solid var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; }
+  .success-screen h2 { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; margin-bottom: 12px; }
+  .success-screen p { color: var(--muted); font-size: 15px; line-height: 1.6; max-width: 500px; margin: 0 auto; }
+
+  /* Invalid prompt */
+  .invalid-screen { text-align: center; padding: 100px 48px; }
+  .invalid-screen h2 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 12px; }
+  .invalid-screen p { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  @media (max-width: 680px) {
+    header { padding: 18px 20px; }
+    .form-wrap { padding: 28px 20px 60px; }
+    .participant-card { grid-template-columns: 1fr; }
+    .question-row { grid-template-columns: 1fr; gap: 12px; }
+    .likert label { width: 32px; height: 32px; font-size: 12px; }
+    .form-hero h1 { font-size: 28px; }
+    .submit-area { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark"><div class="logo-inner"></div></div>
+  <div>
+    <div class="brand-name">Talent Compass</div>
+    <div class="brand-sub">by SV Advisory</div>
+  </div>
+  <div class="header-right" id="header-info">Confidential &amp; Proprietary</div>
+</header>
+
+<!-- Main form area -->
+<div id="main-form">
+  <div class="form-wrap">
+
+    <!-- Invalid state (shown if params missing) -->
+    <div id="invalid-state" class="invalid-screen" style="display:none;">
+      <h2>Invalid Assessment Link</h2>
+      <p>This link appears to be incomplete or expired. Please contact your HR team for a new assessment link.</p>
+    </div>
+
+    <!-- Actual form (shown when params valid) -->
+    <div id="form-content" style="display:none;">
+      <div class="form-hero">
+        <div class="form-badge"><span></span><span id="badge-text">Loading...</span></div>
+        <h1 id="form-title">Loading...</h1>
+        <p id="form-desc">Please wait while your assessment loads.</p>
+      </div>
+
+      <!-- Participant info card (pre-filled from URL) -->
+      <div class="participant-card" id="participant-card">
+        <div class="pc-field">
+          <label>Name</label>
+          <div class="pc-value" id="display-name">—</div>
+          <div class="pc-locked">Pre-filled · locked</div>
+        </div>
+        <div class="pc-field">
+          <label id="id-label">Employee ID</label>
+          <div class="pc-value" id="display-id">—</div>
+          <div class="pc-locked">Pre-filled · locked</div>
+        </div>
+        <div class="pc-field">
+          <label>Tier</label>
+          <div class="pc-value" id="display-tier">—</div>
+          <div class="pc-locked">Pre-filled · locked</div>
+        </div>
+        <!-- Manager assessment also shows employee name being assessed -->
+        <div class="pc-field" id="assessing-field" style="display:none;">
+          <label>Assessing</label>
+          <div class="pc-value" id="display-assessing">—</div>
+          <div class="pc-locked">Pre-filled · locked</div>
+        </div>
+        <!-- Editable: email -->
+        <div class="pc-field pc-editable">
+          <label>Your Email</label>
+          <input type="email" id="input-email" placeholder="your@email.com">
+        </div>
+        <!-- Manager: how long managed -->
+        <div class="pc-field pc-editable" id="duration-field" style="display:none;">
+          <label>Managed this person for</label>
+          <select id="input-duration" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;width:100%;">
+            <option value="">Select...</option>
+            <option>Less than 3 months</option>
+            <option>3–6 months</option>
+            <option>6–12 months</option>
+            <option>Over 12 months</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="scale-legend">
+        <span><strong>1</strong> — Never</span>
+        <span><strong>2</strong> — Rarely</span>
+        <span><strong>3</strong> — Sometimes</span>
+        <span><strong>4</strong> — Often</span>
+        <span><strong>5</strong> — Always</span>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Progress</span><span id="progress-pct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+
+      <!-- Questions injected here by JS -->
+      <div id="questions-container"></div>
+
+      <div class="submit-area">
+        <div class="submit-note">All responses are confidential and for internal HR use only. Results are not shared with participants or managers.</div>
+        <div>
+          <div class="error-msg" id="error-msg">Please answer all questions before submitting.</div>
+          <button class="submit-btn" id="submit-btn" onclick="submitAssessment()">
+            Submit Assessment
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Success screen -->
+<div id="success-screen" class="success-screen">
+  <div class="success-icon">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <h2>Assessment Submitted</h2>
+  <p id="success-msg">Thank you. Your responses have been recorded and will be reviewed by HR as part of the Talent Compass process.</p>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIGURATION — update these when deploying
+// ═══════════════════════════════════════════════
+const CONFIG = {
+  // Your Make.com webhook URL (paste after creating scenario)
+  WEBHOOK_URL: 'https://hook.eu1.make.com/YOUR_WEBHOOK_ID_HERE',
+  
+  // Market benchmarks per question (Entry / Mid)
+  // Format: { questionId: [entryBenchmark, midBenchmark] }
+  BENCHMARKS: {
+    // Entry dimensions
+    '1.1': 4.4, '1.2': 4.5, '1.3': 4.3, '1.4': 4.4,
+    '2.1': 4.2, '2.2': 4.3, '2.3': 4.2, '2.4': 4.3,
+    '3.1': 4.6, '3.2': 4.5, '3.3': 4.4, '3.4': 4.5,
+    '4.1': 4.4, '4.2': 4.3, '4.3': 4.4, '4.4': 4.2,
+    '5.1': 4.3, '5.2': 4.2, '5.3': 4.1, '5.4': 4.2,
+    '6.1': 4.4, '6.2': 4.3, '6.3': 4.4, '6.4': 4.3,
+    '7.1': 4.5, '7.2': 4.4, '7.3': 4.5, '7.4': 4.4,
+    '8.1': 4.4, '8.2': 4.3, '8.3': 4.4, '8.4': 4.3,
+    // Mid dimensions
+    '9.1': 4.6, '9.2': 4.5, '9.3': 4.5, '9.4': 4.6,
+    '10.1': 4.7, '10.2': 4.6, '10.3': 4.5, '10.4': 4.6,
+    '11.1': 4.7, '11.2': 4.6, '11.3': 4.6, '11.4': 4.7,
+    '12.1': 4.5, '12.2': 4.4, '12.3': 4.4, '12.4': 4.5,
+    '13.1': 4.5, '13.2': 4.4, '13.3': 4.4, '13.4': 4.5,
+    '14.1': 4.6, '14.2': 4.5, '14.3': 4.5, '14.4': 4.6,
+    '15.1': 4.4, '15.2': 4.3, '15.3': 4.4, '15.4': 4.4,
+    '16.1': 4.6, '16.2': 4.5, '16.3': 4.6, '16.4': 4.5,
+  }
+};
+
+// ═══════════════════════════════════════════════
+// QUESTION BANK
+// ═══════════════════════════════════════════════
+const ENTRY_SELF_QUESTIONS = [
+  { dim: '01', title: 'Learning Agility', theory: 'Speed-to-Competence Theory', questions: [
+    { id: '1.1', text: 'I actively seek feedback on my work and apply it to improve my performance.' },
+    { id: '1.2', text: 'When I make a mistake or face a setback, I reflect on it and change my approach.' },
+    { id: '1.3', text: 'I ask thoughtful questions when I encounter unfamiliar tasks or concepts, rather than guessing.' },
+    { id: '1.4', text: 'I proactively build skills relevant to my role without being told to.' },
+  ]},
+  { dim: '02', title: 'Communication & Influence', theory: 'Social Intelligence Theory', questions: [
+    { id: '2.1', text: 'I express my ideas clearly, both in writing and verbally, in a way that others understand easily.' },
+    { id: '2.2', text: 'I listen attentively and confirm understanding before acting on instructions or feedback.' },
+    { id: '2.3', text: 'I adjust how I communicate depending on who I\'m speaking to (senior, peer, client).' },
+    { id: '2.4', text: 'I proactively update stakeholders on progress, delays, or changes without being asked.' },
+  ]},
+  { dim: '03', title: 'Execution & Project Ownership', theory: 'High Conscientiousness / Meta-analysis', questions: [
+    { id: '3.1', text: 'I consistently deliver work on time and to the expected quality standard.' },
+    { id: '3.2', text: 'I take full responsibility for my tasks — including when things go wrong — rather than deflecting blame.' },
+    { id: '3.3', text: 'I effectively prioritise my workload when I have multiple tasks or competing demands.' },
+    { id: '3.4', text: 'I follow through on commitments and close open loops without needing reminders.' },
+  ]},
+  { dim: '04', title: 'Collaboration', theory: 'Self-Transcendence / Readiness for People Management', questions: [
+    { id: '4.1', text: 'I actively contribute in team settings and don\'t wait to be asked for my input.' },
+    { id: '4.2', text: 'I support teammates when they are under pressure or need help, even if it\'s outside my role.' },
+    { id: '4.3', text: 'I share credit for team achievements rather than claiming individual recognition.' },
+    { id: '4.4', text: 'When I disagree with a team decision, I raise it constructively rather than disengaging or complaining.' },
+  ]},
+  { dim: '05', title: 'Problem Solving', theory: 'Cognitive Complexity Theory', questions: [
+    { id: '5.1', text: 'When a problem occurs, I try to identify the root cause before jumping to solutions.' },
+    { id: '5.2', text: 'When I escalate an issue, I come with a proposed solution rather than just the problem.' },
+    { id: '5.3', text: 'I make sound decisions under pressure, even when I don\'t have all the information.' },
+    { id: '5.4', text: 'I think through the downstream impact of my decisions before acting.' },
+  ]},
+  { dim: '06', title: 'Adaptability', theory: 'Psychological Flexibility / VUCA', questions: [
+    { id: '6.1', text: 'I respond positively to change at work, even when it disrupts my routine.' },
+    { id: '6.2', text: 'I maintain composure and effectiveness when working under pressure or uncertainty.' },
+    { id: '6.3', text: 'I embrace new tools, systems, or processes quickly and without resistance.' },
+    { id: '6.4', text: 'After a difficult situation or failure, I recover quickly and get back on track.' },
+  ]},
+  { dim: '07', title: 'Relationships & Trust', theory: 'Relational Coordination Theory', questions: [
+    { id: '7.1', text: 'People at work trust me to do what I say I will do.' },
+    { id: '7.2', text: 'I am approachable — colleagues feel comfortable coming to me with questions or problems.' },
+    { id: '7.3', text: 'I handle sensitive information and interpersonal situations with discretion and professionalism.' },
+    { id: '7.4', text: 'I represent my team positively to others inside and outside the organisation.' },
+  ]},
+  { dim: '08', title: 'Growth & Initiative', theory: 'Proactive Work Behaviour (Intrapreneurship)', questions: [
+    { id: '8.1', text: 'I volunteer for stretch assignments or projects that push me beyond my comfort zone.' },
+    { id: '8.2', text: 'I show genuine curiosity about the business — how it works, how it makes money, where it is going.' },
+    { id: '8.3', text: 'I identify and suggest improvements to processes, tools, or ways of working.' },
+    { id: '8.4', text: 'I am intentional about my own professional progress and have a clear sense of where I want to grow.' },
+  ]},
+];
+
+// Manager versions (same dimensions, "they" framing)
+const ENTRY_MGR_QUESTIONS = ENTRY_SELF_QUESTIONS.map(dim => ({
+  ...dim,
+  questions: dim.questions.map(q => ({
+    ...q,
+    text: q.text
+      .replace(/^I /g, 'This person ')
+      .replace(/ I /g, ' they ')
+      .replace(/\bI\b/g, 'they')
+      .replace(/\bmy\b/g, 'their')
+      .replace(/\bme\b/g, 'them')
+      .replace(/^This person actively seek/,'This person actively seeks')
+      .replace(/^This person make/,'This person makes')
+      .replace(/^This person ask/,'This person asks')
+      .replace(/^This person proactively build/,'This person proactively builds')
+      .replace(/^This person express/,'This person expresses')
+      .replace(/^This person listen/,'This person listens')
+      .replace(/^This person adjust/,'This person adjusts')
+      .replace(/^This person consistently deliver/,'This person consistently delivers')
+      .replace(/^This person take/,'This person takes')
+      .replace(/^This person effectively prioritise/,'This person effectively prioritises')
+      .replace(/^This person follow/,'This person follows')
+      .replace(/^This person actively contribute/,'This person actively contributes')
+      .replace(/^This person support/,'This person supports')
+      .replace(/^This person share/,'This person shares')
+      .replace(/^This person respond/,'This person responds')
+      .replace(/^This person maintain/,'This person maintains')
+      .replace(/^This person embrace/,'This person embraces')
+      .replace(/^This person volunteer/,'This person volunteers')
+      .replace(/^This person show/,'This person shows')
+      .replace(/^This person identify/,'This person identifies')
+  }))
+}));
+
+const MID_SELF_QUESTIONS = [
+  { dim: '09', title: 'Learning Agility (Advanced)', theory: 'Cross-Functional Application of Learning', questions: [
+    { id: '9.1', text: 'I apply lessons from past projects to improve how I approach new challenges across different contexts.' },
+    { id: '9.2', text: 'I am aware of my own blind spots and actively work to address them.' },
+    { id: '9.3', text: 'I stay current with industry trends and bring external insights into my work and team discussions.' },
+    { id: '9.4', text: 'I actively share knowledge and learnings with my team to accelerate their growth.' },
+  ]},
+  { dim: '10', title: 'Communication & Influence (Advanced)', theory: 'Senior Stakeholder Influence & Facilitation', questions: [
+    { id: '10.1', text: 'I can distil complex information and present it clearly to different audiences, including senior leaders.' },
+    { id: '10.2', text: 'I build consensus and gain buy-in from peers and cross-functional stakeholders effectively.' },
+    { id: '10.3', text: 'I facilitate meetings productively — with clear objectives, focused discussion, and actionable outcomes.' },
+    { id: '10.4', text: 'I persuade and influence others using evidence, logic, and relationship — not just authority.' },
+  ]},
+  { dim: '11', title: 'Execution & Project Ownership (Advanced)', theory: 'End-to-End Accountability & Stakeholder Management', questions: [
+    { id: '11.1', text: 'I identify and focus my team\'s effort on the highest-priority workstreams that drive the most value.' },
+    { id: '11.2', text: 'I proactively manage stakeholder expectations, including when things are not going to plan.' },
+    { id: '11.3', text: 'I manage resource constraints effectively — time, budget, and people — without compromising quality.' },
+    { id: '11.4', text: 'I take end-to-end accountability for projects — from brief through delivery and review.' },
+  ]},
+  { dim: '12', title: 'Cross-Functional Collaboration', theory: 'Breaking Silos & Bridging Conflict', questions: [
+    { id: '12.1', text: 'I build strong working relationships with peers across different departments and functions.' },
+    { id: '12.2', text: 'I actively break down silos and encourage information-sharing across teams.' },
+    { id: '12.3', text: 'When inter-departmental conflict arises, I step in to mediate and find workable solutions.' },
+    { id: '12.4', text: 'I invest in collaborative partnerships that deliver better outcomes than working alone or within my silo.' },
+  ]},
+  { dim: '13', title: 'Advanced Problem Solving', theory: 'Systemic Thinking & Risk Anticipation', questions: [
+    { id: '13.1', text: 'I identify systemic problems — not just isolated incidents — and address the underlying cause.' },
+    { id: '13.2', text: 'I use data and evidence to develop solutions, rather than relying primarily on intuition.' },
+    { id: '13.3', text: 'I make confident, well-reasoned decisions even when information is incomplete or ambiguous.' },
+    { id: '13.4', text: 'I anticipate risk before it surfaces and plan contingencies proactively.' },
+  ]},
+  { dim: '14', title: 'Adaptability & Team Resilience', theory: 'Leading Teams Through Ambiguity', questions: [
+    { id: '14.1', text: 'When change is imposed, I help maintain team morale and keep people focused on what matters.' },
+    { id: '14.2', text: 'I am a stabilising influence during periods of uncertainty — my team looks to me for direction.' },
+    { id: '14.3', text: 'I recover from high-stakes failures or crises in a way that restores confidence and momentum.' },
+    { id: '14.4', text: 'I adapt my leadership style based on what the situation, team, or individual requires.' },
+  ]},
+  { dim: '15', title: 'Stakeholder Management & Trust', theory: 'Senior Relationship Building & Organisational Navigation', questions: [
+    { id: '15.1', text: 'Senior leaders trust my judgment and regularly seek my input on decisions.' },
+    { id: '15.2', text: 'I navigate internal politics effectively — protecting my team and advancing our work without getting derailed.' },
+    { id: '15.3', text: 'I have difficult conversations transparently and directly, without letting issues fester.' },
+    { id: '15.4', text: 'I align stakeholders across departments on shared goals, even when their priorities differ.' },
+  ]},
+  { dim: '16', title: 'Mentorship & Process Initiative', theory: 'Intrapreneurship & Talent Development', questions: [
+    { id: '16.1', text: 'I drive process improvement at a departmental level — not just within my immediate team.' },
+    { id: '16.2', text: 'I actively mentor or coach junior team members to accelerate their growth and confidence.' },
+    { id: '16.3', text: 'I take on and deliver stretch goals that demonstrate leadership readiness beyond my current role.' },
+    { id: '16.4', text: 'I actively carry and reinforce the organisation\'s values through my behaviour — not just words.' },
+  ]},
+];
+
+const MID_MGR_QUESTIONS = MID_SELF_QUESTIONS.map(dim => ({
+  ...dim,
+  questions: dim.questions.map(q => ({
+    ...q,
+    text: q.text
+      .replace(/^I /g, 'This person ')
+      .replace(/\bmy\b/g, 'their')
+      .replace(/\bme\b/g, 'them')
+      .replace(/\bI\b/g, 'they')
+  }))
+}));
+
+// Open text questions
+const OPEN_QUESTIONS_ENTRY_SELF = [
+  { key: 'proud_of', label: 'Reflection 1', text: 'What work are you most proud of in the last 6–12 months? Describe what you did and why it mattered.' },
+  { key: 'grown', label: 'Reflection 2', text: 'Where have you grown the most since joining? What changed about how you work?' },
+  { key: 'challenge', label: 'Reflection 3', text: 'What has been your biggest challenge at work? How did you handle it?' },
+  { key: 'support', label: 'Reflection 4', text: 'What kind of support, development, or opportunities would help you perform at your best?' },
+];
+const OPEN_QUESTIONS_ENTRY_MGR = [
+  { key: 'contribution', label: 'Observation 1', text: 'What is this person\'s most valuable contribution to the team over the last 6–12 months?' },
+  { key: 'strengths', label: 'Observation 2', text: 'What are their top 2–3 observable strengths as a professional?' },
+  { key: 'develop', label: 'Observation 3', text: 'What behaviours would you most want to see them develop or improve?' },
+  { key: 'potential', label: 'Observation 4', text: 'Do you believe this person has potential for increased responsibility? What gives you confidence or pause?' },
+];
+const OPEN_QUESTIONS_MID_SELF = [
+  { key: 'proud_of', label: 'Reflection 1', text: 'What is your most significant leadership contribution in the last 6–12 months? What was the business impact?' },
+  { key: 'grown', label: 'Reflection 2', text: 'Where have you grown most as a leader? What shifted in your approach?' },
+  { key: 'challenge', label: 'Reflection 3', text: 'What has been your most difficult leadership challenge? How did you navigate it?' },
+  { key: 'ambition', label: 'Reflection 4', text: 'Where do you see yourself in 2–3 years, and what investment or opportunity would help you get there?' },
+];
+const OPEN_QUESTIONS_MID_MGR = [
+  { key: 'contribution', label: 'Observation 1', text: 'What is this person\'s most significant leadership contribution in the last 6–12 months? What was the business impact?' },
+  { key: 'strengths', label: 'Observation 2', text: 'What are their top 2–3 observable leadership strengths?' },
+  { key: 'develop', label: 'Observation 3', text: 'What leadership behaviours would you most want to see them develop or improve?' },
+  { key: 'readiness', label: 'Observation 4', text: 'Do you believe this person is ready for greater leadership scope or responsibility? What gives you confidence or pause?' },
+];
+
+// ═══════════════════════════════════════════════
+// URL PARAMETER PARSING
+// ═══════════════════════════════════════════════
+function getParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    id: p.get('id') || '',
+    name: decodeURIComponent(p.get('name') || ''),
+    tier: (p.get('tier') || '').toLowerCase(),   // 'entry' | 'mid'
+    type: (p.get('type') || '').toLowerCase(),   // 'self' | 'manager'
+    empName: decodeURIComponent(p.get('empname') || ''), // for manager: employee being assessed
+    empId: p.get('empid') || '',                  // for manager: employee ID being assessed
+    token: p.get('token') || '',                  // unique token for dedup
+  };
+}
+
+// ═══════════════════════════════════════════════
+// FORM RENDERING
+// ═══════════════════════════════════════════════
+function renderForm(params) {
+  const { id, name, tier, type, empName, empId, token } = params;
+  const isManager = type === 'manager';
+  const isMid = tier === 'mid';
+
+  // Set header info
+  document.getElementById('header-info').textContent = 
+    isManager ? `Manager Assessment · ${tier === 'mid' ? 'Middle Management' : 'Entry Level'}` 
+              : `Self Assessment · ${tier === 'mid' ? 'Middle Management' : 'Entry Level'}`;
+
+  // Set badge
+  document.getElementById('badge-text').textContent = 
+    `${tier === 'mid' ? 'Middle Management' : 'Entry Professional'} · ${isManager ? 'Manager Assessment' : 'Self Assessment'}`;
+
+  // Set title & description
+  const titleEl = document.getElementById('form-title');
+  if (isManager) {
+    titleEl.innerHTML = `${tier === 'mid' ? 'Middle Management' : 'Entry Professional'}<br><em>Manager Assessment</em>`;
+    document.getElementById('form-desc').textContent = 
+      `You are assessing ${empName || 'your direct report'}. Please respond based on observed behaviour over the last 6–12 months. All responses are confidential and for HR use only.`;
+  } else {
+    titleEl.innerHTML = `${tier === 'mid' ? 'Middle Management' : 'Entry Professional'}<br><em>Self Assessment</em>`;
+    document.getElementById('form-desc').textContent = 
+      `This assessment is confidential and for internal HR use only. Your honest responses help identify your strengths and areas for targeted investment.`;
+  }
+
+  // Participant card
+  document.getElementById('display-name').textContent = name || '—';
+  document.getElementById('display-id').textContent = id || '—';
+  document.getElementById('display-tier').textContent = tier === 'mid' ? 'Middle Management' : 'Entry Level';
+
+  if (isManager) {
+    document.getElementById('assessing-field').style.display = 'block';
+    document.getElementById('display-assessing').textContent = empName || empId || '—';
+    document.getElementById('duration-field').style.display = 'block';
+    document.getElementById('id-label').textContent = 'Your ID';
+    document.getElementById('participant-card').classList.add('manager-card');
+  }
+
+  // Render Likert questions
+  const dims = isManager
+    ? (isMid ? MID_MGR_QUESTIONS : ENTRY_MGR_QUESTIONS)
+    : (isMid ? MID_SELF_QUESTIONS : ENTRY_SELF_QUESTIONS);
+
+  const openQs = isManager
+    ? (isMid ? OPEN_QUESTIONS_MID_MGR : OPEN_QUESTIONS_ENTRY_MGR)
+    : (isMid ? OPEN_QUESTIONS_MID_SELF : OPEN_QUESTIONS_ENTRY_SELF);
+
+  let html = '';
+  dims.forEach(dim => {
+    html += `
+      <div class="dimension-block">
+        <div class="dim-header">
+          <div class="dim-number">${dim.dim}</div>
+          <div>
+            <div class="dim-title">${dim.title}</div>
+            <div class="dim-theory">${dim.theory}</div>
+          </div>
+        </div>`;
+    dim.questions.forEach(q => {
+      html += `
+        <div class="question-row">
+          <div>
+            <div class="question-id">${q.id}</div>
+            <div class="question-text">${q.text}</div>
+          </div>
+          <div class="likert">
+            ${[1,2,3,4,5].map(v => `
+              <input type="radio" name="q_${q.id.replace('.','_')}" id="q_${q.id.replace('.','_')}_${v}" value="${v}">
+              <label for="q_${q.id.replace('.','_')}_${v}">${v}</label>
+            `).join('')}
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+  });
+
+  // Open text block
+  html += `
+    <div class="dimension-block">
+      <div class="dim-header">
+        <div class="dim-number" style="background:rgba(201,162,39,0.15);border-color:rgba(201,162,39,0.3);color:var(--gold-light);">◈</div>
+        <div>
+          <div class="dim-title" style="color:var(--gold-light);">${isManager ? 'Manager Observations' : 'Open Reflections'}</div>
+          <div class="dim-theory" style="color:var(--gold);">Qualitative Context — For HR Use Only</div>
+        </div>
+      </div>`;
+  openQs.forEach(q => {
+    html += `
+      <div class="open-text-block">
+        <div class="q-label">${q.label}</div>
+        <div class="question-text">${q.text}</div>
+        <textarea id="open_${q.key}" placeholder="Share your response here..."></textarea>
+      </div>`;
+  });
+  html += '</div>';
+
+  document.getElementById('questions-container').innerHTML = html;
+
+  // Attach progress listeners
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', updateProgress);
+  });
+}
+
+function updateProgress() {
+  const allNames = new Set([...document.querySelectorAll('input[type="radio"]')].map(r => r.name));
+  let answered = 0;
+  allNames.forEach(name => {
+    if (document.querySelector(`[name="${name}"]:checked`)) answered++;
+  });
+  const pct = allNames.size > 0 ? Math.round((answered / allNames.size) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+// ═══════════════════════════════════════════════
+// COLLECT & SUBMIT
+// ═══════════════════════════════════════════════
+function collectScores(params) {
+  const { tier, type } = params;
+  const isManager = type === 'manager';
+  const isMid = tier === 'mid';
+  const dims = isManager
+    ? (isMid ? MID_MGR_QUESTIONS : ENTRY_MGR_QUESTIONS)
+    : (isMid ? MID_SELF_QUESTIONS : ENTRY_SELF_QUESTIONS);
+
+  const scores = {};
+  const dimAverages = {};
+  let allAnswered = true;
+
+  dims.forEach(dim => {
+    let dimTotal = 0; let dimCount = 0;
+    dim.questions.forEach(q => {
+      const radio = document.querySelector(`[name="q_${q.id.replace('.','_')}"]:checked`);
+      if (radio) {
+        const val = parseFloat(radio.value);
+        scores[q.id] = val;
+        dimTotal += val; dimCount++;
+      } else {
+        allAnswered = false;
+      }
+    });
+    if (dimCount > 0) dimAverages[dim.title] = Math.round((dimTotal / dimCount) * 10) / 10;
+  });
+
+  // Open text
+  const openText = {};
+  document.querySelectorAll('[id^="open_"]').forEach(el => {
+    openText[el.id.replace('open_', '')] = el.value.trim();
+  });
+
+  // Compute gap to benchmark
+  const gaps = {};
+  Object.keys(scores).forEach(qId => {
+    const bench = CONFIG.BENCHMARKS[qId];
+    if (bench) gaps[qId] = Math.round((scores[qId] - bench) * 10) / 10;
+  });
+
+  return { scores, dimAverages, gaps, openText, allAnswered };
+}
+
+async function submitAssessment() {
+  const params = getParams();
+  const btn = document.getElementById('submit-btn');
+  const errMsg = document.getElementById('error-msg');
+  const emailEl = document.getElementById('input-email');
+
+  const { scores, dimAverages, gaps, openText, allAnswered } = collectScores(params);
+
+  if (!allAnswered) {
+    errMsg.textContent = 'Please answer all questions before submitting.';
+    errMsg.style.display = 'block';
+    document.querySelector('.dimension-block').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  if (!emailEl.value || !emailEl.value.includes('@')) {
+    errMsg.textContent = 'Please enter a valid email address.';
+    errMsg.style.display = 'block';
+    emailEl.focus();
+    return;
+  }
+
+  errMsg.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const payload = {
+    // Identity
+    respondent_type: params.type,        // 'self' | 'manager'
+    tier: params.tier,                   // 'entry' | 'mid'
+    employee_id: params.id,
+    employee_name: params.name,
+    respondent_email: emailEl.value,
+    token: params.token,
+    // Manager-specific
+    employee_being_assessed_name: params.empName,
+    employee_being_assessed_id: params.empId,
+    manager_duration: document.getElementById('input-duration')?.value || '',
+    // Scores
+    scores,
+    dim_averages: dimAverages,
+    gaps_to_benchmark: gaps,
+    open_text: openText,
+    submitted_at: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch(CONFIG.WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok || res.status === 200) {
+      document.getElementById('main-form').style.display = 'none';
+      const succ = document.getElementById('success-screen');
+      succ.style.display = 'block';
+      if (params.type === 'manager') {
+        document.getElementById('success-msg').textContent = 
+          `Thank you for completing the manager assessment for ${params.empName || 'your report'}. Your responses have been recorded securely.`;
+      }
+    } else {
+      throw new Error('Server error');
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Assessment <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+    errMsg.textContent = 'Submission failed. Please check your connection and try again.';
+    errMsg.style.display = 'block';
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const params = getParams();
+  const valid = params.id && params.name && 
+    ['entry','mid'].includes(params.tier) && 
+    ['self','manager'].includes(params.type);
+
+  if (!valid) {
+    document.getElementById('invalid-state').style.display = 'block';
+  } else {
+    document.getElementById('form-content').style.display = 'block';
+    renderForm(params);
+  }
+});
+</script>
+</body>
+</html>
